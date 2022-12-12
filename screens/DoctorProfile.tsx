@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
 	TouchableOpacity,
 	TextInput,
@@ -18,12 +19,21 @@ import { useNavigation } from "@react-navigation/native";
 import CalendarStrip from "react-native-calendar-strip";
 import React from "react";
 import { useState, useEffect } from "react";
-
+import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { getSingleDoctor } from "../redux/doctorSlice";
 import { AppDispatch } from "../store";
+import { AsyncStorage } from "react-native";
 
 const DoctorProfile = ({ route }: any) => {
+	const [user, SetUser] = useState<any>(null);
+	const [data, setData] = useState({
+		doctor: "",
+		patient: "",
+		date: "",
+		time: "",
+		reason: "",
+	});
 	const id = route.params.id;
 	// console.log(id);
 	const [doc, setDoc] = useState(null);
@@ -33,8 +43,22 @@ const DoctorProfile = ({ route }: any) => {
 
 	const dispatch = useDispatch<AppDispatch>();
 	const doct = useSelector((state: any) => state.doctor);
-
 	const { doctor, loading, error } = doct;
+
+	useEffect(() => {
+		async function fetchData() {
+			const user: any = await AsyncStorage.getItem("userinfo");
+
+			if (user) {
+				SetUser(JSON.parse(user).user);
+			}
+		}
+		fetchData();
+
+		return () => {
+			console.log("");
+		};
+	}, []);
 
 	useEffect(() => {
 		if (id) {
@@ -47,6 +71,14 @@ const DoctorProfile = ({ route }: any) => {
 			setDoc(doctor);
 		}
 	}, [doctor]);
+
+	const createAppoint = () => {
+		const temp = data;
+		temp.doctor = id;
+		temp.patient = user._id;
+		temp.time = selectedTime;
+		console.log(temp);
+	};
 
 	return (
 		<ScrollView style={styles.container}>
@@ -149,6 +181,9 @@ const DoctorProfile = ({ route }: any) => {
 						disabledDateNumberStyle={{ color: "grey" }}
 						iconContainer={{ flex: 0.1 }}
 						selectedDate={new Date()}
+						onDateSelected={(date) => {
+							setData({ ...data, date: moment(date).format("ddd-MM-YYYY") });
+						}}
 					/>
 				</View>
 				<View style={{ borderColor: "#C6C6C6", borderWidth: 1 }}></View>
@@ -158,6 +193,8 @@ const DoctorProfile = ({ route }: any) => {
 					style={styles.input}
 					placeholder='Reason for Appointment...'
 					placeholderTextColor='#838282'
+					value={data.reason}
+					onChangeText={(val) => setData({ ...data, reason: val })}
 					keyboardType='default'
 				/>
 
@@ -192,7 +229,9 @@ const DoctorProfile = ({ route }: any) => {
 					})}
 				</View>
 
-				<TouchableOpacity style={styles.bookBtn}>
+				<TouchableOpacity
+					style={styles.bookBtn}
+					onPress={() => createAppoint()}>
 					<Text style={styles.bookBtnText}>Make an Appointment</Text>
 				</TouchableOpacity>
 			</View>
