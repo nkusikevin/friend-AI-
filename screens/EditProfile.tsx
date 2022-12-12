@@ -12,10 +12,43 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { AsyncStorage } from "react-native";
 
 const EditProfile = () => {
+	const [user, SetUser] = useState<any>(null);
+	const [data, setData] = useState({
+		username: "",
+		email: "",
+		password: "",
+	});
 	const navigation = useNavigation();
+
+	let userInfo: any;
+
+	useEffect(() => {
+		async function fetchData() {
+			const user: any = await AsyncStorage.getItem("userinfo");
+
+			if (user) {
+				// console.log(JSON.parse(user).user.username);
+				SetUser(JSON.parse(user).user);
+
+				userInfo = JSON.parse(user);
+			}
+		}
+		fetchData();
+
+		return () => {
+			console.log("");
+		};
+	}, []);
+	useEffect(() => {
+		if (user) {
+			setData({ ...data, username: user.username, email: user.email });
+		}
+	}, [user]);
+
 	return (
 		<ScrollView style={styles.container}>
 			<View style={styles.profile}>
@@ -30,7 +63,7 @@ const EditProfile = () => {
 				<View style={styles.profileImage}>
 					<Image
 						style={styles.Image}
-						source={require("../assets/images/doc.jpg")}
+						source={{ uri: `${user && user.avatar}` }}
 					/>
 					<Text style={styles.editPic}>Change Picture</Text>
 				</View>
@@ -39,15 +72,25 @@ const EditProfile = () => {
 			<View style={styles.form}>
 				<View style={styles.name}>
 					<Text style={styles.nameText}>Name</Text>
-					<TextInput style={styles.nameInput} placeholder='Kevin' />
+					<TextInput
+						style={styles.nameInput}
+						placeholder='Kevin'
+						value={data.username}
+						onChangeText={(val) => setData({ ...data, username: val })}
+					/>
 				</View>
 
 				<View style={styles.email}>
 					<Text style={styles.emailText}>Email</Text>
-					<TextInput style={styles.emailInput} placeholder='' />
+					<TextInput
+						style={styles.emailInput}
+						placeholder=''
+						value={data.email}
+						onChangeText={(val) => setData({ ...data, email: val })}
+					/>
 				</View>
 
-				<View style={styles.password}>
+				{/* <View style={styles.password}>
 					<Text style={styles.passwordText}>Password</Text>
 					<TextInput style={styles.passwordInput} placeholder='' />
 				</View>
@@ -55,7 +98,7 @@ const EditProfile = () => {
 				<View style={styles.confirmPassword}>
 					<Text style={styles.confirmPasswordText}>Confirm Password</Text>
 					<TextInput style={styles.confirmPasswordInput} placeholder='' />
-				</View>
+				</View> */}
 
 				<View style={styles.saveChanges}>
 					<TouchableOpacity

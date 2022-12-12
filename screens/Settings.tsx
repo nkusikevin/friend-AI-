@@ -47,8 +47,8 @@ const Settings = () => {
 					style={styles.profileImage}
 					source={{ uri: `${user && user.avatar}` }}
 				/>
-				<Text style={styles.profileName}>Kevin</Text>
-				<Text style={styles.profileEmail}>me@gmail.com</Text>
+				<Text style={styles.profileName}>{user && user.username}</Text>
+				<Text style={styles.profileEmail}>{user && user.email}</Text>
 
 				<TouchableOpacity
 					style={styles.editProfile}
