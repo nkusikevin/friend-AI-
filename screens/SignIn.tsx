@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { SocialIcon } from "react-native-elements";
 import {
@@ -8,12 +9,66 @@ import {
 	Pressable,
 } from "react-native";
 import { RootTabScreenProps } from "../types";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../redux/usersSlice";
+import Toast from "react-native-toast-message";
+import { AppDispatch } from "../store";
+import { AsyncStorage } from "react-native";
 
 export default function SignIn({ navigation }: RootTabScreenProps<"SignIn">) {
-	const handleSignIn = () => {
+	const [data, setData] = useState({
+		email: "",
+		password: "",
+	});
+	const dispatch = useDispatch<AppDispatch>();
+
+	const usert = useSelector((state: any) => state.user);
+	const { loading, error, user } = usert;
+	const handleSignIn = async () => {
 		//navigate to home when clicked
-		navigation.navigate("Homes");
+		// navigation.navigate("Homes");
+		if (data.email === "" || data.password === "") {
+			return Toast.show({
+				type: "error",
+				text1: "all fields are required",
+			});
+		} else {
+			// console.log(data);
+
+			await dispatch(login(data));
+			// console.log(user);
+		}
 	};
+
+	useEffect(() => {
+		if (user) {
+			navigation.navigate("Homes");
+		} else if (error) {
+			Toast.show({
+				type: "error",
+				text1: error.error,
+			});
+		}
+		return () => {
+			console.log("");
+		};
+	}, [user, error]);
+
+	useEffect(() => {
+		async function fetchData() {
+			const user: any = await AsyncStorage.getItem("userinfo");
+
+			if (user) {
+				navigation.navigate("Homes");
+			}
+		}
+		fetchData();
+
+		return () => {
+			console.log("");
+		};
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Hello Again!</Text>
@@ -23,6 +78,8 @@ export default function SignIn({ navigation }: RootTabScreenProps<"SignIn">) {
 				placeholder='Your Email'
 				keyboardType='email-address'
 				placeholderTextColor={"black"}
+				value={data.email}
+				onChangeText={(val) => setData({ ...data, email: val })}
 				underlineColorAndroid={"transparent"}
 			/>
 			<TextInput
@@ -30,13 +87,18 @@ export default function SignIn({ navigation }: RootTabScreenProps<"SignIn">) {
 				placeholder='Password'
 				secureTextEntry={true}
 				placeholderTextColor={"black"}
+				value={data.password}
+				onChangeText={(val) => setData({ ...data, password: val })}
 				underlineColorAndroid={"transparent"}
 			/>
 			<TouchableOpacity
 				activeOpacity={0.8}
 				onPress={handleSignIn}
+				disabled={loading}
 				style={styles.appButtonContainer}>
-				<Text style={styles.appButtonText}>Sign in</Text>
+				<Text style={styles.appButtonText}>
+					{loading ? "Loading..." : "Sign In"}
+				</Text>
 			</TouchableOpacity>
 			<View
 				style={{
@@ -80,6 +142,7 @@ export default function SignIn({ navigation }: RootTabScreenProps<"SignIn">) {
 					<Text style={styles.Relink}>Register Now</Text>
 				</Pressable>
 			</View>
+			<Toast />
 		</View>
 	);
 }

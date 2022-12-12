@@ -7,7 +7,8 @@ import {
 	StyleSheet,
 	ScrollView,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { AsyncStorage } from "react-native";
 import { RootTabScreenProps } from "../types";
 import { FontAwesome } from "@expo/vector-icons";
 import TopHeader from "../components/TopHeader";
@@ -15,10 +16,32 @@ import CalendarStrip from "react-native-calendar-strip";
 import DoctorCard from "../components/DoctorCard";
 
 const Home = ({ navigation }: RootTabScreenProps<"Home">) => {
+	const [user, SetUser] = useState<any>(null);
+	let userInfo: any;
+
+	useEffect(() => {
+		async function fetchData() {
+			const user: any = await AsyncStorage.getItem("userinfo");
+
+			if (user) {
+				// console.log(JSON.parse(user).user.username);
+				SetUser(JSON.parse(user).user);
+				userInfo = JSON.parse(user);
+			} else if (!user) {
+				navigation.navigate("SignIn");
+			}
+		}
+		fetchData();
+
+		return () => {
+			console.log("");
+		};
+	}, []);
+
 	return (
 		<ScrollView style={styles.container} scrollEventThrottle={16}>
 			<TopHeader />
-			<Text style={styles.title}>Hello Kevin! 👋</Text>
+			<Text style={styles.title}>Hello {user && user.username}! 👋</Text>
 			<View style={styles.searchBar}>
 				<FontAwesome name='search' size={24} color='#3E3E3E' />
 				<TextInput

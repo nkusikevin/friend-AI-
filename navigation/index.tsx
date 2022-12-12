@@ -4,6 +4,7 @@
  *
  */
 import { FontAwesome } from "@expo/vector-icons";
+import { useEffect } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
 	NavigationContainer,
@@ -27,6 +28,8 @@ import QuickTest from "../screens/QuickTest";
 import EditProfile from "../screens/EditProfile";
 import Appointment from "../screens/Appointment";
 import DoctorProfile from "../screens/DoctorProfile";
+import { AsyncStorage } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
 import {
 	RootStackParamList,
 	RootTabParamList,
@@ -142,8 +145,28 @@ function Homes() {
 }
 
 function RootNavigator() {
+	const [isSignedIn, setIsSignedIn] = React.useState<any>(null);
+	// const navigation = useNavigation();
+	// let userInfo;
+	// useEffect(() => {
+	// 	async function fetchData() {
+	// 		userInfo = await AsyncStorage.getItem("userinfo");
+	// 		if (userInfo) {
+	// 			const user = JSON.parse(userInfo);
+	// 			setIsSignedIn(user.token);
+	// 		} else if (!userInfo) {
+	// 			console.log("no user");
+	// 		}
+	// 	}
+	// 	fetchData();
+	// 	return () => {
+	// 		console.log("");
+	// 	};
+	// }, [userInfo]);
 	return (
 		<Stack.Navigator initialRouteName='SignIn'>
+			{/* {!isSignedIn ? (
+				<React.Fragment> */}
 			<Stack.Screen
 				name='SignIn'
 				component={SignIn}
@@ -152,6 +175,14 @@ function RootNavigator() {
 			<Stack.Screen
 				name='SignUp'
 				component={SignUp}
+				options={{ headerShown: false }}
+			/>
+			{/* </React.Fragment>
+			) : (
+				<React.Fragment> */}
+			<Stack.Screen
+				name='Homes'
+				component={Homes}
 				options={{ headerShown: false }}
 			/>
 			<Stack.Screen
@@ -165,15 +196,13 @@ function RootNavigator() {
 				options={{ headerShown: false }}
 			/>
 			<Stack.Screen
-				name='Homes'
-				component={Homes}
-				options={{ headerShown: false }}
-			/>
-			<Stack.Screen
 				name='NotFound'
 				component={NotFoundScreen}
 				options={{ title: "Oops!" }}
 			/>
+			{/* </React.Fragment>
+			)} */}
+
 			<Stack.Group screenOptions={{ presentation: "modal" }}>
 				<Stack.Screen name='Modal' component={ModalScreen} />
 			</Stack.Group>

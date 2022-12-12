@@ -11,11 +11,32 @@ import {
 	PlatformColor,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
+import { AsyncStorage } from "react-native";
+import React, { useState, useEffect } from "react";
+
 const Settings = () => {
 	const navigation = useNavigation();
+	const [user, SetUser] = useState<any>(null);
+	let userInfo: any;
 
-	const handleLogout = () => {
+	useEffect(() => {
+		async function fetchData() {
+			const user: any = await AsyncStorage.getItem("userinfo");
+
+			if (user) {
+				// console.log(JSON.parse(user).user.username);
+				SetUser(JSON.parse(user).user);
+				userInfo = JSON.parse(user);
+			}
+		}
+		fetchData();
+
+		return () => {
+			console.log("");
+		};
+	}, []);
+	const handleLogout = async () => {
+		await AsyncStorage.removeItem("userinfo");
 		navigation.navigate("SignIn");
 	};
 
@@ -24,7 +45,7 @@ const Settings = () => {
 			<View style={styles.profile}>
 				<Image
 					style={styles.profileImage}
-					source={require("../assets/images/doc.jpg")}
+					source={{ uri: `${user && user.avatar}` }}
 				/>
 				<Text style={styles.profileName}>Kevin</Text>
 				<Text style={styles.profileEmail}>me@gmail.com</Text>
@@ -48,12 +69,12 @@ const Settings = () => {
 						<Text style={styles.settingButtonText}>English</Text>
 					</Pressable>
 				</View>
-				<View style={styles.setting}>
+				{/* <View style={styles.setting}>
 					<Text style={styles.settingText}>Currency</Text>
 					<Pressable style={styles.settingButton}>
 						<Text style={styles.settingButtonText}>USD</Text>
 					</Pressable>
-				</View>
+				</View> */}
 				<View style={styles.setting}>
 					<Text style={styles.settingText}>Dark Mode</Text>
 					<Pressable style={styles.settingButton}>

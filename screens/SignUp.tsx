@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { SocialIcon } from "react-native-elements";
 import {
@@ -8,9 +9,56 @@ import {
 	Pressable,
 } from "react-native";
 import { RootTabScreenProps } from "../types";
+import { useDispatch, useSelector } from "react-redux";
+import { register } from "../redux/usersSlice";
+import Toast from "react-native-toast-message";
+import { AppDispatch } from "../store";
 
 export default function SignUp({ navigation }: RootTabScreenProps<"SignUp">) {
-	const handleSignUp = () => {};
+	const [confirm, setConfirm] = useState("");
+	const [data, setData] = useState({
+		username: "",
+		email: "",
+		password: "",
+	});
+	const dispatch = useDispatch<AppDispatch>();
+
+	const usert = useSelector((state: any) => state.user);
+	const { loading, error, user } = usert;
+	const handleSignUp = async () => {
+		if (confirm !== data.password) {
+			return Toast.show({
+				type: "error",
+				text1: "passwords do not match!",
+			});
+		} else if (
+			data.email === "" ||
+			data.password === "" ||
+			data.username === ""
+		) {
+			return Toast.show({
+				type: "error",
+				text1: "all fields are required",
+			});
+		} else {
+			await dispatch(register(data));
+		}
+	};
+
+	useEffect(() => {
+		if (user) {
+			navigation.navigate("SignIn");
+		} else if (error) {
+			Toast.show({
+				type: "error",
+				text1: error.error,
+			});
+		}
+		return () => {
+			console.log("");
+		};
+	}, [user, error]);
+
 	return (
 		<View style={styles.container}>
 			<Text style={styles.title}>Hello Welcome to Friend Ai🫶</Text>
@@ -18,6 +66,8 @@ export default function SignUp({ navigation }: RootTabScreenProps<"SignUp">) {
 			<TextInput
 				style={styles.textinput}
 				placeholder='Your Names'
+				value={data.username}
+				onChangeText={(val) => setData({ ...data, username: val })}
 				placeholderTextColor={"black"}
 				underlineColorAndroid={"transparent"}
 			/>
@@ -25,6 +75,8 @@ export default function SignUp({ navigation }: RootTabScreenProps<"SignUp">) {
 				style={styles.textinput}
 				placeholder='Your Email'
 				keyboardType='email-address'
+				value={data.email}
+				onChangeText={(val) => setData({ ...data, email: val })}
 				placeholderTextColor={"black"}
 				underlineColorAndroid={"transparent"}
 			/>
@@ -33,6 +85,8 @@ export default function SignUp({ navigation }: RootTabScreenProps<"SignUp">) {
 				placeholder='Password'
 				secureTextEntry={true}
 				placeholderTextColor={"black"}
+				value={data.password}
+				onChangeText={(val) => setData({ ...data, password: val })}
 				underlineColorAndroid={"transparent"}
 			/>
 			<TextInput
@@ -40,13 +94,18 @@ export default function SignUp({ navigation }: RootTabScreenProps<"SignUp">) {
 				placeholder='Confirm Password'
 				secureTextEntry={true}
 				placeholderTextColor={"black"}
+				value={confirm}
+				onChangeText={(val) => setConfirm(val)}
 				underlineColorAndroid={"transparent"}
 			/>
 			<TouchableOpacity
 				activeOpacity={0.8}
 				onPress={handleSignUp}
+				disabled={loading}
 				style={styles.appButtonContainer}>
-				<Text style={styles.appButtonText}>Sign Up</Text>
+				<Text style={styles.appButtonText}>
+					{loading ? "Loading..." : "Sign Up"}
+				</Text>
 			</TouchableOpacity>
 
 			<View style={styles.reDirecter}>
@@ -55,6 +114,7 @@ export default function SignUp({ navigation }: RootTabScreenProps<"SignUp">) {
 					<Text style={styles.Relink}>Sign in</Text>
 				</Pressable>
 			</View>
+			<Toast />
 		</View>
 	);
 }
