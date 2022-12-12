@@ -24,6 +24,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getSingleDoctor } from "../redux/doctorSlice";
 import { AppDispatch } from "../store";
 import { AsyncStorage } from "react-native";
+import validate from "../utils/ObjectChecker";
+import Toast from "react-native-toast-message";
+import { createAppointment } from "../redux/appointment";
 
 const DoctorProfile = ({ route }: any) => {
 	const [user, SetUser] = useState<any>(null);
@@ -72,12 +75,25 @@ const DoctorProfile = ({ route }: any) => {
 		}
 	}, [doctor]);
 
-	const createAppoint = () => {
+	const createAppoint = async () => {
 		const temp = data;
 		temp.doctor = id;
 		temp.patient = user._id;
 		temp.time = selectedTime;
-		console.log(temp);
+		const valid = validate(temp);
+		if (valid) {
+			await dispatch(createAppointment(temp));
+			Toast.show({
+				type: "success",
+				text1: "Appointment Created",
+			});
+			navigation.navigate("Homes");
+		} else {
+			return Toast.show({
+				type: "error",
+				text1: "all fields are required",
+			});
+		}
 	};
 
 	return (
@@ -235,6 +251,7 @@ const DoctorProfile = ({ route }: any) => {
 					<Text style={styles.bookBtnText}>Make an Appointment</Text>
 				</TouchableOpacity>
 			</View>
+			<Toast />
 		</ScrollView>
 	);
 };
