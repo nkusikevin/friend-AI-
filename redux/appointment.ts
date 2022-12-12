@@ -5,10 +5,19 @@ import axios from "axios";
 //get single note
 const url = "http://192.168.1.104:3000/api/appointment";
 
-export const getAllAppoint = createAsyncThunk("doctor/getDoctor", async () => {
-	const response = await axios.get(url);
-	return response.data;
-});
+export const getAllAppoint = createAsyncThunk(
+	"doctor/getAllAppoint",
+
+	async (id: any, { rejectWithValue }) => {
+		try {
+			const response = await axios.get(`${url}/user/${id}`);
+			return response.data;
+		} catch (error) {
+			//@ts-ignore
+			return rejectWithValue(error.response.data);
+		}
+	}
+);
 
 export const createAppointment = createAsyncThunk(
 	"doctor/createAppointment",
