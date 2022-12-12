@@ -17,12 +17,36 @@ import { Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import CalendarStrip from "react-native-calendar-strip";
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const DoctorProfile = () => {
+import { useDispatch, useSelector } from "react-redux";
+import { getSingleDoctor } from "../redux/doctorSlice";
+import { AppDispatch } from "../store";
+
+const DoctorProfile = ({ route }: any) => {
+	const id = route.params.id;
+	// console.log(id);
+	const [doc, setDoc] = useState(null);
 	const navigation = useNavigation();
 	const availableHours = ["09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM"];
 	const [selectedTime, setSelectedTime] = useState("");
+
+	const dispatch = useDispatch<AppDispatch>();
+	const doct = useSelector((state: any) => state.doctor);
+
+	const { doctor, loading, error } = doct;
+
+	useEffect(() => {
+		if (id) {
+			dispatch(getSingleDoctor(id));
+		}
+	}, [id]);
+
+	useEffect(() => {
+		if (doctor) {
+			setDoc(doctor);
+		}
+	}, [doctor]);
 
 	return (
 		<ScrollView style={styles.container}>
@@ -40,8 +64,8 @@ const DoctorProfile = () => {
 				</TouchableOpacity>
 				<View style={styles.docdits}>
 					<View>
-						<Text style={styles.docName}>Dr. Misoke Kiela</Text>
-						<Text style={styles.docTitle}>Psychotherapist</Text>
+						<Text style={styles.docName}>Dr. {doc && doc.username}</Text>
+						<Text style={styles.docTitle}>{doc && doc.specialization}</Text>
 						<Text style={styles.docWork}>Private Therapist</Text>
 						<View style={styles.docAvaila}>
 							<EvilIcons name='calendar' size={24} color='#9CA0AA' />
@@ -71,7 +95,8 @@ const DoctorProfile = () => {
 				<View style={styles.docImage}>
 					<Image
 						style={styles.docImg}
-						source={require("../assets/images/doc.jpg")}
+						//@ts-ignore
+						source={{ uri: `${doc && doc.avatar}` }}
 					/>
 				</View>
 			</LinearGradient>
@@ -80,14 +105,17 @@ const DoctorProfile = () => {
 					<Text style={styles.docExTittle}>Patients</Text>
 					<View style={styles.docStats}>
 						<MaterialIcons name='groups' size={24} color='#2A8AF7' />
-						<Text style={styles.docExNumber}> 500+</Text>
+						<Text style={styles.docExNumber}> 100+</Text>
 					</View>
 				</View>
 				<View style={styles.docExCard}>
 					<Text style={styles.docExTittle}>Experience</Text>
 					<View style={styles.docStats}>
 						<FontAwesome5 name='briefcase-medical' size={24} color='#2A8AF7' />
-						<Text style={styles.docExNumber}> 3 Years</Text>
+						<Text style={styles.docExNumber}>
+							{" "}
+							{doc && doc.experience} Years
+						</Text>
 					</View>
 				</View>
 				<View style={styles.docExCard}>

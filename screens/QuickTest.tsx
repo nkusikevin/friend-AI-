@@ -8,10 +8,13 @@ import {
 	Image,
 	ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TopHeader from "../components/TopHeader";
 import { Octicons } from "@expo/vector-icons";
 import DocSearchCard from "../components/DocSearchCard";
+import { useDispatch, useSelector } from "react-redux";
+import { getDoctors } from "../redux/doctorSlice";
+import { AppDispatch } from "../store";
 const QuickTest = () => {
 	const [search, setSearch] = useState("");
 	const searchOptions = [
@@ -22,6 +25,15 @@ const QuickTest = () => {
 		"Family",
 		"Psychologist",
 	];
+	const dispatch = useDispatch<AppDispatch>();
+	const doct = useSelector((state: any) => state.doctor);
+
+	const { doctors, loading, error } = doct;
+
+	useEffect(() => {
+		dispatch(getDoctors());
+	}, []);
+
 	return (
 		<ScrollView style={styles.container}>
 			<TopHeader />
@@ -48,14 +60,8 @@ const QuickTest = () => {
 				})}
 			</ScrollView>
 			<View style={{ marginBottom: 100 }}>
-				<DocSearchCard />
-				<DocSearchCard />
-				<DocSearchCard />
-				<DocSearchCard />
-				<DocSearchCard />
-				<DocSearchCard />
-				<DocSearchCard />
-				<DocSearchCard />
+				{doctors &&
+					doctors.map((doc: any) => <DocSearchCard key={doc._id} doc={doc} />)}
 			</View>
 		</ScrollView>
 	);

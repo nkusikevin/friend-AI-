@@ -37,7 +37,7 @@ export const register = createAsyncThunk(
 );
 
 export const usersSlice = createSlice({
-	name: "noteSlice",
+	name: "usersSlice",
 	initialState: {
 		user: null,
 		error: null,

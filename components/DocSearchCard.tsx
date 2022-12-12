@@ -16,22 +16,20 @@ import { Entypo } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-const DocSearchCard = () => {
+const DocSearchCard = ({ doc }: any) => {
 	const navigation = useNavigation();
 	return (
 		<View style={styles.container}>
 			<TouchableOpacity
 				onPress={() => {
-					navigation.navigate("DoctorProfile");
+					//@ts-ignore
+					navigation.navigate("DoctorProfile", { id: doc?._id });
 				}}>
-				<Image
-					style={styles.Slogo}
-					source={require("../assets/images/doc.jpg")}
-				/>
+				<Image style={styles.Slogo} source={{ uri: `${doc && doc.avatar}` }} />
 			</TouchableOpacity>
 			<View>
 				<View style={styles.topDocName}>
-					<Text style={styles.docName}>Dr. Misoke Kiela</Text>
+					<Text style={styles.docName}>Dr. {doc && doc.username}</Text>
 					<MaterialCommunityIcons
 						name='heart-multiple-outline'
 						size={24}
@@ -40,7 +38,7 @@ const DocSearchCard = () => {
 				</View>
 				<View
 					style={{ borderBottomColor: "gray", borderBottomWidth: 1 }}></View>
-				<Text style={styles.docTitle}>Psychotherapist|CHUK</Text>
+				<Text style={styles.docTitle}>{doc && doc.specialization}|CHUK</Text>
 				<View style={styles.DocreviewContainer}>
 					<View style={styles.Docreview}>
 						<FontAwesome name='star-half-o' size={24} color='#0048E2' />
