@@ -1,38 +1,37 @@
-import {
-	TouchableOpacity,
-	TextInput,
-	Text,
-	View,
-	Pressable,
-	StyleSheet,
-	Image,
-	ScrollView,
-	Platform,
-	PlatformColor,
-} from "react-native";
-import React from "react";
+import { Text, View, StyleSheet, Image, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SimpleLineIcons } from "@expo/vector-icons";
 import TopHeader from "../components/TopHeader";
+import moment from "moment";
+import { useDispatch, useSelector } from "react-redux";
+import { getAllAppoint } from "../redux/appointment";
+import { AppDispatch } from "../store";
+import { AsyncStorage } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
-const SmallCard = () => {
+const SmallCard = ({ appoint }: any) => {
 	return (
 		<View style={styles.docCardContainer}>
 			<View style={styles.docCardOwner}>
 				<View>
 					<Image
 						style={styles.Slogo}
-						source={require("../assets/images/profile.jpg")}
+						source={{ uri: `${appoint && appoint.doctor.avatar}` }}
 					/>
 				</View>
 				<View>
-					<Text style={styles.docName}>Dr. Misoke Kiela</Text>
-					<Text style={styles.docTitle}>Special cycologist</Text>
+					<Text style={styles.docName}>
+						Dr. {appoint && appoint.doctor.username}
+					</Text>
+					<Text style={styles.docTitle}>
+						{appoint && appoint.doctor.specialization}
+					</Text>
 					<View style={styles.SdocAppointment}>
 						<SimpleLineIcons name='clock' size={24} color='black' />
 						<Text style={styles.SappointmentTime}>
-							Thu, February at 09:25 -9:45
+							{appoint && appoint.date} at {appoint && appoint.time}
 						</Text>
 					</View>
 				</View>
@@ -48,6 +47,41 @@ const SmallCard = () => {
 };
 
 const Schedule = () => {
+	const [user, SetUser] = useState<any>(null);
+	const [appoints, setAppoint] = useState<any>(null);
+	const dispatch = useDispatch<AppDispatch>();
+	const Appoint = useSelector((state: any) => state.appointment);
+	const { appointments, loading, error } = Appoint;
+
+	useEffect(() => {
+		async function fetchData() {
+			const user: any = await AsyncStorage.getItem("userinfo");
+
+			if (user) {
+				SetUser(JSON.parse(user).user);
+			}
+		}
+		fetchData();
+
+		return () => {
+			console.log("");
+		};
+	}, []);
+
+	useFocusEffect(
+		React.useCallback(() => {
+			if (user) {
+				dispatch(getAllAppoint(user._id));
+			}
+			return () => console.log("");
+		}, [user])
+	);
+	useEffect(() => {
+		if (appointments) {
+			setAppoint(appointments.appointments);
+		}
+	}, [appointments]);
+
 	return (
 		<ScrollView style={styles.container}>
 			<TopHeader />
@@ -76,10 +110,8 @@ const Schedule = () => {
 				</View>
 			</View>
 			<View style={{ marginBottom: 80 }}>
-				<SmallCard />
-				<SmallCard />
-				<SmallCard />
-				<SmallCard />
+				{appoints &&
+					appoints.map((appoint: any) => <SmallCard appoint={appoint} />)}
 			</View>
 		</ScrollView>
 	);
